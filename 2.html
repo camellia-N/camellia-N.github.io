@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>重庆旅游攻略 | 星空之旅</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+  
+  <!-- Tailwind 配置 -->
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: '#3B82F6',
+            secondary: '#10B981',
+            accent: '#8B5CF6',
+            dark: '#1E293B',
+            light: '#F8FAFC'
+          },
+          fontFamily: {
+            inter: ['Inter', 'system-ui', 'sans-serif'],
+          },
+        },
+      }
+    }
+  </script>
+  
+  <!-- 自定义工具类 -->
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .content-auto {
+        content-visibility: auto;
+      }
+      .bg-stars {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' viewBox='0 0 4 4'%3E%3Cpath fill='%23ffffff' fill-opacity='0.1' d='M1 3h1v1H1V3zm2-2h1v1H3V1z'%3E%3C/path%3E%3C/svg%3E");
+      }
+      .bg-stars-dark {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' viewBox='0 0 4 4'%3E%3Cpath fill='%23ffffff' fill-opacity='0.05' d='M1 3h1v1H1V3zm2-2h1v1H3V1z'%3E%3C/path%3E%3C/svg%3E");
+      }
+      .text-shadow {
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+      .text-shadow-lg {
+        text-shadow: 0 4px 8px rgba(0,0,0,0.25);
+      }
+      .animate-float {
+        animation: float 6s ease-in-out infinite;
+      }
+      .animate-pulse-slow {
+        animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+      }
+      @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+      }
+    }
+  </style>
+  
+  <style>
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      scroll-behavior: smooth;
+    }
+    
+    /* 星空背景动画 */
+    .star {
+      position: absolute;
+      background-color: white;
+      border-radius: 50%;
+      animation: twinkle 3s infinite ease-in-out;
+    }
+    
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
+    
+    /* 导航栏滚动效果 */
+    .navbar-scrolled {
+      @apply bg-dark/90 backdrop-blur-md shadow-lg;
+    }
+    
+    /* 景点卡片悬停效果 */
+    .attraction-card {
+      transition: all 0.3s ease;
+    }
+    
+    .attraction-card:hover {
+      transform: translateY(-8px);
+    }
+    
+    
+    /* 流程步骤样式 */
+    .timeline-item {
+      position: relative;
+      padding-left: 2rem;
+      margin-bottom: 2rem;
+    }
+    
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 1.5rem;
+      height: 1.5rem;
+      border-radius: 50%;
+      background-color: #3B82F6;
+      z-index: 10;
+    }
+    
+    .timeline-item::after {
+      content: '';
+      position: absolute;
+      left: 0.75rem;
+      top: 1.5rem;
+      width: 2px;
+      height: calc(100% - 1.5rem);
+      background-color: rgba(59, 130, 246, 0.3);
+      transform: translateX(-50%);
+    }
+    
+    .timeline-item:last-child::after {
+      display: none;
+    }
+  </style>
+</head>
+
+<body class="bg-slate-900 text-white overflow-x-hidden">
+  <!-- 星空背景 -->
+  <div id="stars-container" class="fixed inset-0 bg-gradient-to-b from-indigo-900 via-purple-900 to-slate-900 bg-stars z-0"></div>
+  
+  <!-- 导航栏 -->
+  <nav id="navbar" class="fixed w-full z-50 transition-all duration-300">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+      <a href="#home" class="text-2xl font-bold text-white flex items-center">
+        <i class="fa fa-map-o mr-2"></i>
+        <span>重庆旅游攻略</span>
+      </a>
+      
+      <!-- 桌面导航 -->
+      <div class="hidden md:flex items-center space-x-8">
+        <a href="#home" class="text-white hover:text-primary transition-colors">首页</a>
+        <a href="#team" class="text-white hover:text-primary transition-colors">团队信息</a>
+        <a href="#attractions" class="text-white hover:text-primary transition-colors">精选景点</a>
+        <a href="#itinerary" class="text-white hover:text-primary transition-colors">行程安排</a>
+        <a href="#tips" class="text-white hover:text-primary transition-colors">旅行贴士</a>
+      </div>
+      
+      <!-- 功能按钮 -->
+      <div class="flex items-center space-x-4">
+        <button id="menu-toggle" class="md:hidden p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors">
+          <i class="fa fa-bars"></i>
+        </button>
+      </div>
+    </div>
+    
+    <!-- 移动端导航菜单 -->
+    <div id="mobile-menu" class="md:hidden hidden bg-dark/95 backdrop-blur-md">
+      <div class="container mx-auto px-4 py-4 flex flex-col space-y-4">
+        <a href="#home" class="text-white hover:text-primary transition-colors py-2">首页</a>
+        <a href="#team" class="text-white hover:text-primary transition-colors py-2">团队信息</a>
+        <a href="#attractions" class="text-white hover:text-primary transition-colors py-2">精选攻略</a>
+        <a href="#itinerary" class="text-white hover:text-primary transition-colors py-2">行程安排</a>
+        <a href="#tips" class="text-white hover:text-primary transition-colors py-2">旅行贴士</a>
+      </div>
+    </div>
+  </nav>   
+  <!-- 首页 -->
+  <section id="home" class="relative min-h-screen flex items-center justify-center overflow-hidden">
+    <div class="absolute inset-0 z-0">
+      <div class="absolute inset-0 bg-black/40"></div>
+      <img id="bg-image" src="https://picsum.photos/seed/chongqing1/1920/1080" alt="重庆夜景" class="w-full h-full object-cover">
+    </div>
+    
+    <div class="container mx-auto px-4 z-10 text-center">
+      <h1 class="text-[clamp(2.5rem,8vw,5rem)] font-bold text-white text-shadow-lg mb-6 animate-float">
+        重庆之旅
+      </h1>
+      <p class="text-[clamp(1rem,3vw,1.5rem)] text-white/90 text-shadow mb-10 max-w-3xl mx-auto">
+        探索山城魅力，感受两江风情
+      </p>
+      <div class="flex flex-col sm:flex-row justify-center gap-4">
+        <a href="#team" class="px-8 py-3 bg-primary hover:bg-primary/90 text-white font-medium rounded-full transition-all transform hover:scale-105 hover:shadow-lg">
+          了解团队
+        </a>
+        <a href="#attractions" class="px-8 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white font-medium rounded-full transition-all transform hover:scale-105 hover:shadow-lg">
+          探索景点
+        </a>
+      </div>
+    </div>
+    
+    <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce">
+      <a href="#team" class="text-white/80 hover:text-white transition-colors">
+        <i class="fa fa-chevron-down text-2xl"></i>
+      </a>
+    </div>
+  </section>
+  
+  <!-- 团队信息 -->
+  <section id="team" class="relative min-h-screen flex items-center py-20 bg-gradient-to-b from-slate-900 to-slate-800 z-10">
+    <div class="container mx-auto px-4">
+      <div class="text-center mb-16">
+        <h2 class="text-[clamp(1.5rem,5vw,3rem)] font-bold mb-4">我们的团队</h2>
+        <p class="text-gray-400 max-w-2xl mx-auto">六位志同道合的朋友，一起踏上探索重庆的旅程</p>
+      </div>
+      
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        <!-- 团队成员1 -->
+        <div class="bg-dark/40 backdrop-blur-sm rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300">
+          <div class="flex items-center mb-4">
+            <img src="1.jpg" alt="团队成员" class="w-16 h-16 rounded-full object-cover border-2 border-primary">
+            <div class="ml-4">
+              <h3 class="text-xl font-semibold"> </h3>
+              <p class="text-primary text-sm"> </p>
+            </div>
+          </div>
+          <p class="text-gray-400"> </p>
+        </div>
+        
+        <!-- 团队成员2 -->
+        <div class="bg-dark/40 backdrop-blur-sm rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300">
+          <div class="flex items-center mb-4">
+            <img src="2.jpg" alt="团队成员" class="w-16 h-16 rounded-full object-cover border-2 border-primary">
+            <div class="ml-4">
+              <h3 class="text-xl font-semibold"> </h3>
+              <p class="text-primary text-sm"> </p>
+            </div>
+          </div>
+          <p class="text-gray-400"> </p>
+        </div>
+        
+        <!-- 团队成员3 -->
+        <div class="bg-dark/40 backdrop-blur-sm rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300">
+          <div class="flex items-center mb-4">
+            <img src="3.jpg" alt="团队成员" class="w-16 h-16 rounded-full object-cover border-2 border-primary">
+            <div class="ml-4">
+              <h3 class="text-xl font-semibold"> </h3>
+              <p class="text-primary text-sm" </p>
+            </div>
+          </div>
+          <p class="text-gray-400"> </p>
+        </div>
+        
+        <!-- 团队成员4 -->
+        <div class="bg-dark/40 backdrop-blur-sm rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300">
+          <div class="flex items-center mb-4">
+            <img src="4.jpg" alt="团队成员" class="w-16 h-16 rounded-full object-cover border-2 border-primary">
+            <div class="ml-4">
+              <h3 class="text-xl font-semibold"> </h3>
+              <p class="text-primary text-sm"> </p>
+            </div>
+          </div>
+          <p class="text-gray-400"> </p>
+        </div>
+        
+        <!-- 团队成员5 -->
+        <div class="bg-dark/40 backdrop-blur-sm rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300">
+          <div class="flex items-center mb-4">
+            <img src="5.jpg" alt="团队成员" class="w-16 h-16 rounded-full object-cover border-2 border-primary">
+            <div class="ml-4">
+              <h3 class="text-xl font-semibold"> </h3>
+              <p class="text-primary text-sm"> </p>
+            </div>
+          </div>
+          <p class="text-gray-400"> </p>
+        </div>
+        
+        <!-- 团队成员6 -->
+        <div class="bg-dark/40 backdrop-blur-sm rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300">
+          <div class="flex items-center mb-4">
+            <img src="6.jpg" alt="团队成员" class="w-16 h-16 rounded-full object-cover border-2 border-primary">
+            <div class="ml-4">
+              <h3 class="text-xl font-semibold"> </h3>
+              <p class="text-primary text-sm"> </p>
+            </div>
+          </div>
+          <p class="text-gray-400"> </p>
+        </div>
+      </div>
+      
+      <div class="mt-16 bg-dark/40 backdrop-blur-sm rounded-xl p-8 shadow-lg">
+        <h3 class="text-2xl font-bold mb-6">行程基本信息</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <h4 class="text-lg font-medium mb-2">出发日期</h4>
+            <p class="text-gray-400"> </p>
+          </div>
+          <div>
+            <h4 class="text-lg font-medium mb-2">集合地点</h4>
+            <p class="text-gray-400"> </p>
+          </div>
+          <div>
+            <h4 class="text-lg font-medium mb-2">联系方式</h4>
+            <p class="text-gray-400"> </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- 景点攻略 -->
+  <section id="attractions" class="relative min-h-screen py-20 bg-gradient-to-b from-slate-800 to-slate-900 z-10">
+    <div class="container mx-auto px-4">
+      <div class="text-center mb-16">
+        <h2 class="text-[clamp(1.5rem,5vw,3rem)] font-bold mb-4">精选景点</h2>
+        <p class="text-gray-400 max-w-2xl mx-auto">探索重庆最具代表性的景点和打卡胜地</p>
+      </div>
+      <!-- 景点列表 -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <!-- 景点1 -->
+        <div class="attraction-card bg-dark/40 backdrop-blur-sm rounded-xl overflow-hidden shadow-lg">
+          <div class="relative h-56 overflow-hidden">
+            <img src="https://miaobi-lite.bj.bcebos.com/miaobi/5mao/b%27LV8xNzM2NDYxMzU1LjcxNTczNjJfMTczNjQ2MTM1Ny42OTY0NDJfMTczNjQ2MTM2MC4wODg4NTYyXzE3MzY0NjEzNjIuNDM0NTk4NF8xNzM2NDYxMzY0Ljc0MTU4MzZfMTczNjQ2MTM2Ny4xODEzMDc4%27/5.png" alt="洪崖洞" class="w-full h-full object-cover transform hover:scale-110 transition-transform duration-500">
+          </div>
+          <div class="p-6">
+            <h3 class="text-xl font-bold mb-2">洪崖洞</h3>
+            <div class="flex items-center mb-3">
+            </div>
+            <p class="text-gray-400 mb-4">洪崖洞以其独特的巴渝传统建筑特色的吊脚楼风貌而闻名，夜晚灯光亮起时，仿佛置身于千与千寻的世界中。</p>
+            <div class="flex flex-wrap gap-2 mb-4">
+              <span class="bg-primary/20 text-primary text-xs px-3 py-1 rounded-full">夜景</span>
+              <span class="bg-primary/20 text-primary text-xs px-3 py-1 rounded-full">美食</span>
+              <span class="bg-primary/20 text-primary text-xs px-3 py-1 rounded-full">拍照打卡</span> 
+        </div>
+		</div>
+	</div>	
+       
+        <!-- 景点2 -->
+        <div class="attraction-card bg-dark/40 backdrop-blur-sm rounded-xl overflow-hidden shadow-lg">
+          <div class="relative h-56 overflow-hidden">
+            <img src="https://qcloud.dpfile.com/pc/OVFetau8Z5NF8jGZ8bWffSys12B9xJlfgd3_0QdDkcNdhzWFKOuIXowzVsir5tSo.jpg" alt="解放碑" class="w-full h-full object-cover transform hover:scale-110 transition-transform duration-500">
+          </div>
+          <div class="p-6">
+            <h3 class="text-xl font-bold mb-2">解放碑</h3>
+            <div class="flex items-center mb-3">
+            </div>
+            <p class="text-gray-400 mb-4">解放碑是重庆的地标性建筑，也是重庆最繁华的商业中心之一，周围有众多商场、餐厅和娱乐场所。</p>
+            <div class="flex flex-wrap gap-2 mb-4">
+              <span class="bg-secondary/20 text-secondary text-xs px-3 py-1 rounded-full">地标</span>
+              <span class="bg-secondary/20 text-secondary text-xs px-3 py-1 rounded-full">购物</span>
+              <span class="bg-secondary/20 text-secondary text-xs px-3 py-1 rounded-full">美食</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 景点3 -->
+        <div class="attraction-card bg-dark/40 backdrop-blur-sm rounded-xl overflow-hidden shadow-lg">
+          <div class="relative h-56 overflow-hidden">
+            <img src="https://img1.qunarzz.com/vs_ceph_b2c_001/c7ceb51e-211d-4e19-8c34-acf387b1c047.jpg" alt="李子坝轻轨站" class="w-full h-full object-cover transform hover:scale-110 transition-transform duration-500">
+          </div>
+          <div class="p-6">
+            <h3 class="text-xl font-bold mb-2">李子坝轻轨站</h3>
+            <div class="flex items-center mb-3">
+            </div>
+            <p class="text-gray-400 mb-4">李子坝轻轨站是重庆最具特色的景点之一，轻轨穿楼而过的奇特景象吸引了无数游客前来打卡。</p>
+            <div class="flex flex-wrap gap-2 mb-4">
+              <span class="bg-accent/20 text-accent text-xs px-3 py-1 rounded-full">网红</span>
+              <span class="bg-accent/20 text-accent text-xs px-3 py-1 rounded-full">交通</span>
+              <span class="bg-accent/20 text-accent text-xs px-3 py-1 rounded-full">拍照</span>
+            </div>            
+          </div>
+        </div>
+        
+        <!-- 景点4 -->
+        <div class="attraction-card bg-dark/40 backdrop-blur-sm rounded-xl overflow-hidden shadow-lg">
+          <div class="relative h-56 overflow-hidden">
+            <img src="https://img1.baidu.com/it/u=2147249786,342769229&fm=253&fmt=auto&app=138&f=JPEG?w=800&h=1208" alt="长江索道" class="w-full h-full object-cover transform hover:scale-110 transition-transform duration-500">
+          </div>
+          <div class="p-6">
+            <h3 class="text-xl font-bold mb-2">长江索道</h3>
+            <div class="flex items-center mb-3">
+            </div>
+            <p class="text-gray-400 mb-4">长江索道是重庆最具特色的交通工具之一，乘坐索道可以俯瞰长江和两岸的城市风光。</p>
+            <div class="flex flex-wrap gap-2 mb-4">
+              <span class="bg-primary/20 text-primary text-xs px-3 py-1 rounded-full">交通</span>
+              <span class="bg-primary/20 text-primary text-xs px-3 py-1 rounded-full">观景</span>
+              <span class="bg-primary/20 text-primary text-xs px-3 py-1 rounded-full">体验</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 景点5 -->
+        <div class="attraction-card bg-dark/40 backdrop-blur-sm rounded-xl overflow-hidden shadow-lg">
+          <div class="relative h-56 overflow-hidden">
+            <img src="https://img2.baidu.com/it/u=4226659077,1738128576&fm=253&fmt=auto&app=120&f=JPEG?w=1199&h=800" alt="磁器口古镇" class="w-full h-full object-cover transform hover:scale-110 transition-transform duration-500">
+          </div>
+          <div class="p-6">
+            <h3 class="text-xl font-bold mb-2">磁器口古镇</h3>
+            <div class="flex items-center mb-3">
+            </div>
+            <p class="text-gray-400 mb-4">磁器口古镇是重庆著名的历史文化街区，保存了许多明清时期的建筑和传统手工艺品。</p>
+            <div class="flex flex-wrap gap-2 mb-4">
+              <span class="bg-secondary/20 text-secondary text-xs px-3 py-1 rounded-full">历史</span>
+              <span class="bg-secondary/20 text-secondary text-xs px-3 py-1 rounded-full">购物</span>
+              <span class="bg-secondary/20 text-secondary text-xs px-3 py-1 rounded-full">美食</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 景点6 -->
+        <div class="attraction-card bg-dark/40 backdrop-blur-sm rounded-xl overflow-hidden shadow-lg">
+          <div class="relative h-56 overflow-hidden">
+            <img src="https://img2.baidu.com/it/u=1118980142,4133368866&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=667" alt="南山一棵树" class="w-full h-full object-cover transform hover:scale-110 transition-transform duration-500">
+          </div>
+          <div class="p-6">
+            <h3 class="text-xl font-bold mb-2">南山一棵树</h3>
+            <div class="flex items-center mb-3">
+            </div>
+            <p class="text-gray-400 mb-4">南山一棵树观景台是观赏重庆夜景的最佳地点之一，可以俯瞰整个渝中半岛的璀璨灯光。</p>
+            <div class="flex flex-wrap gap-2 mb-4">
+              <span class="bg-primary/20 text-primary text-xs px-3 py-1 rounded-full">夜景</span>
+              <span class="bg-primary/20 text-primary text-xs px-3 py-1 rounded-full">观景</span>
+              <span class="bg-primary/20 text-primary text-xs px-3 py-1 rounded-full">拍照</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 加载更多按钮 -->
+      <div class="mt-12 text-center">
+        <button id="load-more-attractions" class="bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white font-medium rounded-lg px-8 py-3 transition-all transform hover:scale-105 hover:shadow-lg">
+          加载更多景点
+        </button>
+      </div>
+    </div>
+  </section>
+  
+  <!-- 行程安排 -->
+  <section id="itinerary" class="relative min-h-screen py-20 bg-gradient-to-b from-slate-900 to-slate-800 z-10">
+    <div class="container mx-auto px-4">
+      <div class="text-center mb-16">
+        <h2 class="text-[clamp(1.5rem,5vw,3rem)] font-bold mb-4">行程安排</h2>
+        <p class="text-gray-400 max-w-2xl mx-auto">七天六夜的重庆深度游，探索山城的每一个角落</p>
+      </div>
+      
+      <!-- 行程导航 -->
+      <div class="flex overflow-x-auto pb-4 mb-8 space-x-2">
+        <button class="itinerary-day-btn bg-primary text-white font-medium rounded-lg px-6 py-3 whitespace-nowrap transition-all transform hover:scale-105 hover:shadow-lg" data-day="day-1">
+          第一天
+        </button>
+        <button class="itinerary-day-btn bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white font-medium rounded-lg px-6 py-3 whitespace-nowrap transition-all transform hover:scale-105 hover:shadow-lg" data-day="day-2">
+          第二天
+        </button>
+        <button class="itinerary-day-btn bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white font-medium rounded-lg px-6 py-3 whitespace-nowrap transition-all transform hover:scale-105 hover:shadow-lg" data-day="day-3">
+          第三天
+        </button>
+        <button class="itinerary-day-btn bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white font-medium rounded-lg px-6 py-3 whitespace-nowrap transition-all transform hover:scale-105 hover:shadow-lg" data-day="day-4">
+          第四天
+        </button>
+        <button class="itinerary-day-btn bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white font-medium rounded-lg px-6 py-3 whitespace-nowrap transition-all transform hover:scale-105 hover:shadow-lg" data-day="day-5">
+          第五天
+        </button>
+        <button class="itinerary-day-btn bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white font-medium rounded-lg px-6 py-3 whitespace-nowrap transition-all transform hover:scale-105 hover:shadow-lg" data-day="day-6">
+          第六天
+        </button>
+        <button class="itinerary-day-btn bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white font-medium rounded-lg px-6 py-3 whitespace-nowrap transition-all transform hover:scale-105 hover:shadow-lg" data-day="day-7">
+          第七天
+        </button>
+      </div>
+      
+      <!-- 行程内容 -->
+      <div id="itinerary-content">
+        <!-- 第一天行程 -->
+        <div id="day-1" class="itinerary-day-content bg-dark/40 backdrop-blur-sm rounded-xl p-8 shadow-lg">
+          <h3 class="text-2xl font-bold mb-6">第一天： </h3>
+          
+          <div class="timeline">
+            <div class="timeline-item">
+              <h4 class="text-lg font-medium mb-1"> </h4>
+              <p class="text-gray-400"> </p>
+            </div>
+            
+            <div class="timeline-item">
+              <h4 class="text-lg font-medium mb-1"> </h4>
+              <p class="text-gray-400">  </p>
+            </div>
+            
+            <div class="timeline-item">
+              <h4 class="text-lg font-medium mb-1"> </h4>
+              <p class="text-gray-400"> </p>
+            </div>
+            
+            <div class="timeline-item">
+              <h4 class="text-lg font-medium mb-1"> </h4>
+              <p class="text-gray-400"> </p>
+            </div>
+            
+            <div class="timeline-item">
+              <h4 class="text-lg font-medium mb-1"> </h4>
+              <p class="text-gray-400"> </p>
+            </div>
+            
+            <div class="timeline-item">
+              <h4 class="text-lg font-medium mb-1"> </h4>
+              <p class="text-gray-400"> </p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 第二天行程 -->
+        <div id="day-2" class="itinerary-day-content hidden bg-dark/40 backdrop-blur-sm rounded-xl p-8 shadow-lg">
+          <h3 class="text-2xl font-bold mb-6">第二天： </h3>
+          <div class="timeline">
+            <div class="timeline-item">
+              <h4 class="text-lg font-medium mb-1"> </h4>
+              <p class="text-gray-400"> </p>
+            </div>
+            
+            <div class="timeline-item">
+              <h4 class="text-lg font-medium mb-1"> </h4>
+              <p class="text-gray-400"> </p>
+            </div>
+            
+            <div class="timeline-item">
+              <h4 class="text-lg font-medium mb-1"> </h4>
+              <p class="text-gray-400"> </p>
+            </div>
+            
+            <div class="timeline-item">
+              <h4 class="text-lg font-medium mb-1"> </h4>
+              <p class="text-gray-400"> </p>
+            </div>
+            
+            <div class="timeline-item">
+              <h4 class="text-lg font-medium mb-1"> </h4>
+              <p class="text-gray-400"></p>
+            </div>
+            
+            <div class="timeline-item">
+              <h4 class="text-lg font-medium mb-1"> </h4>
+              <p class="text-gray-400"> </p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 第三天行程 -->
+        <div id="day-3" class="itinerary-day-content hidden bg-dark/40 backdrop-blur-sm rounded-xl p-8 shadow-lg">
+          <h3 class="text-2xl font-bold mb-6">第三天： </h3>
+          <div class="timeline">
+            <div class="timeline-item">
+              <h4 class="text-lg font-medium mb-1"> </h4>
+              <p class="text-gray-400"> </p>
+            </div>
+            
+            <div class="timeline-item">
+              <h4 class="text-lg font-medium mb-1"> </h4>
+              <p class="text-gray-400"> </p>
+            </div>
+            
+            <div class="timeline-item">
+              <h4 class="text-lg font-medium mb-1"> </h4>
+              <p class="text-gray-400"> </p>
+            </div>
+            
+            <div class="timeline-item">
+              <h4 class="text-lg font-medium mb-1"> </h4>
+              <p class="text-gray-400"> </p>
+            </div>
+            
+            <div class="timeline-item">
+              <h4 class="text-lg font-medium mb-1"> </h4>
+              <p class="text-gray-400"> </p>
+            </div>
+            
+            <div class="timeline-item">
+              <h4 class="text-lg font-medium mb-1"> </h4>
+              <p class="text-gray-400"> </p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 第四天行程 -->
+        <div id="day-4" class="itinerary-day-content hidden bg-dark/40 backdrop-blur-sm rounded-xl p-8 shadow-lg">
+          <h3 class="text-2xl font-bold mb-6">第四天： </h3>
+          <div class="timeline">
+            <div class="timeline-item">
+              <h4 class="text-lg font-medium mb-1"> </h4>
+              <p class="text-gray-400"> </p>
+            </div>
+            
+            <div class="timeline-item">
+              <h4 class="text-lg font-medium mb-1"> </h4>
+              <p class="text-gray-400"> </p>
+            </div>
+            
+            <div class="timeline-item">
+              <h4 class="text-lg font-medium mb-1"> </h4>
+              <p class="text-gray-400"> </p>
+            </div>
+            
+            <div class="timeline-item">
+              <h4 class="text-lg font-medium mb-1"> </h4>
+              <p class="text-gray-400"> </p>
+            </div>
+            
+            <div class="timeline-item">
+              <h4 class="text-lg font-medium mb-1"> </h4>
+              <p class="text-gray-400"> </p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 第五天行程 -->
+        <div id="day-5" class="itinerary-day-content hidden bg-dark/40 backdrop-blur-sm rounded-xl p-8 shadow-lg">
+          <h3 class="text-2xl font-bold mb-6">第五天： </h3>
+          <div class="timeline">
+            <div class="timeline-item">
+              <h4 class="text-lg font-medium mb-1"> </h4>
+              <p class="text-gray-400"> </p>
+            </div>
+            
+            <div class="timeline-item">
+              <h4 class="text-lg font-medium mb-1"> </h4>
+              <p class="text-gray-400"> </p>
+            </div>
+            
+            <div class="timeline-item">
+              <h4 class="text-lg font-medium mb-1"> </h4>
+              <p class="text-gray-400"> </p>
+            </div>
+            
+            <div class="timeline-item">
+              <h4 class="text-lg font-medium mb-1"> </h4>
+              <p class="text-gray-400"> </p>
+            </div>
+            
+            <div class="timeline-item">
+              <h4 class="text-lg font-medium mb-1"> </h4>
+              <p class="text-gray-400"> </p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 第六天行程 -->
+        <div id="day-6" class="itinerary-day-content hidden bg-dark/40 backdrop-blur-sm rounded-xl p-8 shadow-lg">
+          <h3 class="text-2xl font-bold mb-6">第六天： </h3>
+          <div class="timeline">
+            <div class="timeline-item">
+              <h4 class="text-lg font-medium mb-1"> </h4>
+              <p class="text-gray-400">  </p>
+            </div>
+            
+            <div class="timeline-item">
+              <h4 class="text-lg font-medium mb-1">  </h4>
+              <p class="text-gray-400"> </p>
+            </div>
+            
+            <div class="timeline-item">
+              <h4 class="text-lg font-medium mb-1">  </h4>
+              <p class="text-gray-400"> </p>
+            </div>
+            
+            <div class="timeline-item">
+              <h4 class="text-lg font-medium mb-1"> </h4>
+              <p class="text-gray-400"> </p>
+            </div>
+            
+            <div class="timeline-item">
+              <h4 class="text-lg font-medium mb-1"> </h4>
+              <p class="text-gray-400"> </p>
+            </div>
+            
+            <div class="timeline-item">
+              <h4 class="text-lg font-medium mb-1"> </h4>
+              <p class="text-gray-400"> </p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 第七天行程 -->
+        <div id="day-7" class="itinerary-day-content hidden bg-dark/40 backdrop-blur-sm rounded-xl p-8 shadow-lg">
+          <h3 class="text-2xl font-bold mb-6">第七天： </h3>
+          <div class="timeline">
+            <div class="timeline-item">
+              <h4 class="text-lg font-medium mb-1"> </h4>
+              <p class="text-gray-400"> </p>
+            </div>
+            
+            <div class="timeline-item">
+              <h4 class="text-lg font-medium mb-1"> </h4>
+              <p class="text-gray-400"> </p>
+            </div>
+            
+            <div class="timeline-item">
+              <h4 class="text-lg font-medium mb-1"> </h4>
+              <p class="text-gray-400"> </p>
+            </div>
+            
+            <div class="timeline-item">
+              <h4 class="text-lg font-medium mb-1"> </h4>
+              <p class="text-gray-400"> </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- 旅行贴士  -->
+  <section id="tips" class="py-20 bg-gray-900">
+    <div class="container mx-auto px-4">
+        <div class="text-center mb-16">
+            <h2 class="text-[clamp(1.8rem,5vw,3rem)] font-bold mb-4 text-white">旅行贴士</h2>
+            <p class="text-gray-400 max-w-2xl mx-auto">实用的旅行建议，让你的旅程更加顺利</p>
+        </div>
+        
+        <!-- 贴士卡片 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="bg-gray-800 rounded-xl shadow-lg p-8 transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1 border border-gray-700">
+                <div class="w-14 h-14 bg-blue-900/30 rounded-full flex items-center justify-center mb-6">
+                    <i class="fa fa-suitcase text-blue-400 text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-4 text-white">行李打包建议</h3>
+                <ul class="space-y-4">
+                    <li class="flex items-start">
+                        <i class="fa fa-check text-green-400 mt-1 mr-3"></i>
+                        <span class="text-gray-300">带上轻便防水的外套，山区天气多变</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fa fa-check text-green-400 mt-1 mr-3"></i>
+                        <span class="text-gray-300">准备舒适的徒步鞋 </span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fa fa-check text-green-400 mt-1 mr-3"></i>
+                        <span class="text-gray-300">带上防晒霜、太阳镜和帽子，遮阳伞，夏天紫外线强</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fa fa-check text-green-400 mt-1 mr-3"></i>
+                        <span class="text-gray-300">准备充电宝，保证电子设备随时可用</span>
+                    </li>
+					<li class="flex items-start">
+                        <i class="fa fa-check text-green-400 mt-1 mr-3"></i>
+                        <span class="text-gray-300">随身携带身份证</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fa fa-check text-green-400 mt-1 mr-3"></i>
+                        <span class="text-gray-300">药品清单：感冒药、退烧药、肠胃药、晕车药等</span>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="bg-gray-800 rounded-xl shadow-lg p-8 transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1 border border-gray-700">
+                <div class="w-14 h-14 bg-blue-900/30 rounded-full flex items-center justify-center mb-6">
+                    <i class="fa fa-map text-blue-400 text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-4 text-white">行程注意事项</h3>
+                <ul class="space-y-4">
+                    <li class="flex items-start">
+                        <i class="fa fa-check text-green-400 mt-1 mr-3"></i>
+                        <span class="text-gray-300">提前下载离线地图，部分地区网络信号弱</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fa fa-check text-green-400 mt-1 mr-3"></i>
+                        <span class="text-gray-300">徒步时结伴而行，不要单独行动</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fa fa-check text-green-400 mt-1 mr-3"></i>
+                        <span class="text-gray-300">随身携带紧急联系方式</span>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="bg-gray-800 rounded-xl shadow-lg p-8 transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1 border border-gray-700">
+                <div class="w-14 h-14 bg-blue-900/30 rounded-full flex items-center justify-center mb-6">
+                    <i class="fa fa-money text-blue-400 text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-4 text-white">费用预算参考</h3>
+                <ul class="space-y-4">
+                    <li class="flex items-start">
+                        <i class="fa fa-check text-green-400 mt-1 mr-3"></i>
+                        <span class="text-gray-300">交通： </span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fa fa-check text-green-400 mt-1 mr-3"></i>
+                        <span class="text-gray-300">餐饮： </span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fa fa-check text-green-400 mt-1 mr-3"></i>
+                        <span class="text-gray-300">住宿： </span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fa fa-check text-green-400 mt-1 mr-3"></i>
+                        <span class="text-gray-300">门票： </span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fa fa-check text-green-400 mt-1 mr-3"></i>
+                        <span class="text-gray-300">其他：购物、娱乐等</span>
+                    </li>
+                </ul>
+                <div class="mt-6 pt-6 border-t border-gray-700">
+                    <h4 class="text-lg font-semibold mb-2 text-white">总预算参考</h4>
+                    <p class="text-xl font-bold text-primary"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+  </section>
+  <!-- 脚本 -->
+  <script>
+    // 生成星空背景
+    function generateStars() {
+      const container = document.getElementById('stars-container');
+      const count = 100;
+      
+      for (let i = 0; i < count; i++) {
+        const star = document.createElement('div');
+        star.classList.add('star');
+        
+        // 随机位置
+        const x = Math.random() * 100;
+        const y = Math.random() * 100;
+        
+        // 随机大小
+        const size = Math.random() * 2 + 1;
+        
+        // 随机延迟
+        const delay = Math.random() * 3;
+        
+        star.style.left = `${x}%`;
+        star.style.top = `${y}%`;
+        star.style.width = `${size}px`;
+        star.style.height = `${size}px`;
+        star.style.animationDelay = `${delay}s`;
+        
+        container.appendChild(star);
+      }
+    }
+    
+    // 导航栏滚动效果
+    function handleNavbarScroll() {
+      const navbar = document.getElementById('navbar');
+      
+      if (window.scrollY > 50) {
+        navbar.classList.add('navbar-scrolled');
+      } else {
+        navbar.classList.remove('navbar-scrolled');
+      }
+    }
+    
+    // 移动菜单切换
+    function toggleMobileMenu() {
+      const menuToggle = document.getElementById('menu-toggle');
+      const mobileMenu = document.getElementById('mobile-menu');
+      
+      menuToggle.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+      });
+    }
+    
+    // 首页背景切换
+    function setupBackgroundSlider() {
+      const bgImage = document.getElementById('bg-image');
+      const bgImages = [
+        "https://picsum.photos/seed/chongqing1/1920/1080",
+        "https://picsum.photos/seed/chongqing2/1920/1080",
+        "https://picsum.photos/seed/chongqing3/1920/1080",
+        "https://picsum.photos/seed/chongqing4/1920/1080"
+      ];
+      
+      let currentIndex = 0;
+      
+      function changeBackground() {
+        currentIndex = (currentIndex + 1) % bgImages.length;
+        bgImage.style.opacity = '0';
+        
+        setTimeout(() => {
+          bgImage.src = bgImages[currentIndex];
+          bgImage.style.opacity = '1';
+        }, 500);
+      }
+      
+      // 每10秒切换一次背景
+      setInterval(changeBackground, 10000);
+    }
+    
+    // 加载更多景点
+    function loadMoreAttractions() {
+      const loadMoreBtn = document.getElementById('load-more-attractions');
+      const attractionsContainer = loadMoreBtn.parentElement.previousElementSibling;
+      
+      // 额外的景点数据
+      const additionalAttractions = [
+        {
+          name: "白象居",
+          image: "https://img0.baidu.com/it/u=4254553790,3410840160&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=653",
+          description: "重庆著名的居民楼，因独特的建筑结构和绝佳的江景而成为网红打卡地",
+          tags: ["网红", "江景", "居民楼"]
+        },
+        {
+          name: "鹅岭公园",
+          image: "https://qcloud.dpfile.com/pc/viaAUkBaqneRMyIA0WdSlZ86MPaXlFLVT8wpC8xiolz6yiiYeocFIjl9YnOm2Umq.jpg",
+          description: "重庆最古老的公园之一，园内植被茂盛，有多处观景台可俯瞰城市风光",
+          tags: ["公园", "观景", "历史"]
+        },
+        {
+          name: "皇冠大扶梯",
+          image: "https://pic.rmb.bdstatic.com/4961a29ccdfa28a19d5be9402795c70b.jpg@h_1280",
+          description: "亚洲第二长的一级提升坡地大扶梯，是重庆独特的交通工具之一",
+          tags: ["交通", "体验", "地标"]
+        },
+        {
+          name: "山城步道",
+          image: "https://img1.baidu.com/it/u=539241312,1792368648&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=667",
+          description: "重庆特有的步道系统，串联起多个历史文化街区，是了解老重庆的绝佳方式",
+          tags: ["徒步", "历史", "文化"]
+        },
+        {
+          name: "两江小渡",
+          image: "https://img2.baidu.com/it/u=759956345,4129952500&fm=253&fmt=auto&app=138&f=JPEG?w=667&h=500",
+          description: "乘坐渡轮横渡长江或嘉陵江，欣赏两岸风光，感受重庆的水上交通文化",
+          tags: ["交通", "体验", "江景"]
+        },
+        {
+          name: "重庆大剧院",
+          image: "https://copyright.bdstatic.com/vcg/creative/d8a0dd05b5272895d6019fe0577fafd0.jpg@h_1280",
+          description: "重庆的文化地标，由法国设计师设计，外观独特，夜景非常漂亮",
+          tags: ["文化", "建筑", "夜景"]
+        }
+      ];
+      
+      let loaded = false;
+      
+      loadMoreBtn.addEventListener('click', () => {
+        if (!loaded) {
+          additionalAttractions.forEach(attraction => {
+            const attractionCard = document.createElement('div');
+            attractionCard.className = "attraction-card bg-dark/40 backdrop-blur-sm rounded-xl overflow-hidden shadow-lg";
+            
+            attractionCard.innerHTML = `
+              <div class="relative h-56 overflow-hidden">
+                <img src="${attraction.image}" alt="${attraction.name}" class="w-full h-full object-cover transform hover:scale-110 transition-transform duration-500">
+              </div>
+              <div class="p-6">
+                <h3 class="text-xl font-bold mb-2">${attraction.name}</h3>
+                <div class="flex items-center mb-3">
+                </div>
+                <p class="text-gray-400 mb-4">${attraction.description}</p>
+                <div class="flex flex-wrap gap-2 mb-4">
+                  ${attraction.tags.map(tag => `<span class="bg-primary/20 text-primary text-xs px-3 py-1 rounded-full">${tag}</span>`).join('')}
+                </div>
+              </div>
+            `;
+            
+            attractionsContainer.appendChild(attractionCard);
+          });
+          
+          loadMoreBtn.textContent = "收起景点";
+          loaded = true;
+        } else {
+          // 收起额外景点
+          const allCards = attractionsContainer.querySelectorAll('.attraction-card');
+          for (let i = 6; i < allCards.length; i++) {
+            allCards[i].remove();
+          }
+          
+          loadMoreBtn.textContent = "加载更多景点";
+          loaded = false;
+        }
+      });
+    }
+    
+    // 行程安排的第几天切换功能 
+    function setupItineraryDaySwitching() { 
+      const dayButtons = document.querySelectorAll('.itinerary-day-btn'); 
+      const dayContents = document.querySelectorAll('.itinerary-day-content'); 
+      
+      dayButtons.forEach(button => { 
+        button.addEventListener('click', () => { 
+          dayButtons.forEach(btn => {
+            btn.classList.remove('bg-primary', 'text-white');
+            btn.classList.add('bg-white/10', 'hover:bg-white/20');
+          });
+          
+          dayContents.forEach(content => content.classList.add('hidden')); 
+          
+          button.classList.add('bg-primary', 'text-white');
+          button.classList.remove('bg-white/10', 'hover:bg-white/20');
+          
+          const dayContentId = button.getAttribute('data-day'); 
+          const dayContent = document.getElementById(dayContentId); 
+          dayContent.classList.remove('hidden'); 
+        }); 
+      }); 
+      
+      // 默认显示第一天内容 
+      const firstDayButton = document.querySelector('[data-day="day-1"]'); 
+      firstDayButton.click(); 
+    } 
+    
+    // 初始化所有功能 
+    window.onload = function() { 
+      generateStars(); 
+      handleNavbarScroll(); 
+      toggleMobileMenu(); 
+      setupBackgroundSlider(); 
+      loadMoreAttractions(); 
+      setupItineraryDaySwitching(); 
+      
+      // 监听滚动事件，处理导航栏样式
+      window.addEventListener('scroll', handleNavbarScroll);
+    }
+  </script>
+</body>
+</html>
